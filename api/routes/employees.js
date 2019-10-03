@@ -18,8 +18,8 @@ router.get('/all/', (req, res, next) => {
 
 //get especific employee from 'employees' based on id
 router.get('/find/:employeeId', (req, res, next) => {
-    const employeeId = req.params.employeeId
-    
+    const employeeId = req.params.employeeId;
+
     db.all("SELECT * FROM employees WHERE id = (?)", [employeeId], function (err, employees) {
         if (err) throw err;
         res.status(200).json({
@@ -30,7 +30,7 @@ router.get('/find/:employeeId', (req, res, next) => {
 
 //insert new employee in 'employees'
 router.post('/', (req, res, next) => {
-    const newEmployeeName = req.body.name
+    const newEmployeeName = req.body.name;
 
     db.all("INSERT INTO employees (name) VALUES (?)", [req.body.name], function (err) {
         if (err) throw err;
@@ -43,8 +43,8 @@ router.post('/', (req, res, next) => {
 
 //delete especific employee from 'employees' based on id
 router.delete('/delete/:employeeId', (req, res, next) => {
-    const employeeId = req.params.employeeId
-    
+    const employeeId = req.params.employeeId;
+
     db.all("DELETE FROM employees WHERE id = (?)", [employeeId], function (err, employees) {
         if (err) throw err;
         res.status(200).json({

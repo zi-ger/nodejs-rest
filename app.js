@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const employeeRoutes = require('./api/routes/employees');
 
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({extented: false}));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
