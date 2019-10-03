@@ -1,55 +1,77 @@
 const express = require('express');
-const sqlite = require('sqlite3');
-
 const router = express.Router();
+const mongoose = require('mongoose');
+const Employee = require('../models/employee');
 
-const db = new sqlite.Database('./database.db');
-db.run("CREATE TABLE IF NOT EXISTS employees(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
-
-//get all employees from 'employees'
+//get all employees
 router.get('/all/', (req, res, next) => {
-    db.all("SELECT * FROM employees", function (err, employees) {
-        if (err) throw err;
-        res.status(200).json({
-            employees
-        });
+    Employee.find().exec().then(employess => {
+        res.status(200).json({ employess });
+    }).catch(err => {
+        res.status(500).json({ error: err });
     });
 });
 
-//get especific employee from 'employees' based on id
+//get especific employee based on id
 router.get('/find/:employeeId', (req, res, next) => {
-    const employeeId = req.params.employeeId
-    
-    db.all("SELECT * FROM employees WHERE id = (?)", [employeeId], function (err, employees) {
-        if (err) throw err;
-        res.status(200).json({
-            employees
-        });
+    const employeeId = req.params.employeeId;
+
+    Employee.findById(employeeId).exec().then(employee => {
+        if (employee) {
+            res.status(200).json({ employee });
+        } else {
+            res.status(404).json({ message: 'ID not found.' });
+        }
+    }).catch(err => {
+        res.status(500).json({ error: err });
     });
 });
 
-//insert new employee in 'employees'
+//insert new employee
 router.post('/', (req, res, next) => {
-    const newEmployeeName = req.body.name
+    const newEmployee = new Employee({
+        _id: new mongoose.Types.ObjectId(),
+        name: req.body.name
+    });
 
-    db.all("INSERT INTO employees (name) VALUES (?)", [req.body.name], function (err) {
-        if (err) throw err;
+    newEmployee.save().then(result => {
         res.status(201).json({
             message: 'Employee was created',
-            employee: newEmployeeName
+            employee: newEmployee
         });
+    }).catch(err => {
+        res.status(500).json({ error: err });
     });
 });
 
-//delete especific employee from 'employees' based on id
-router.delete('/delete/:employeeId', (req, res, next) => {
-    const employeeId = req.params.employeeId
-    
-    db.all("DELETE FROM employees WHERE id = (?)", [employeeId], function (err, employees) {
-        if (err) throw err;
+//update especific employee based on id
+router.patch('/update/:employeeId', (req, res, next) => {
+    const employeeId = req.params.employeeId;
+    const newEmployeeName = req.body.newEmployeeName
+
+    Employee.updateOne({ _id: employeeId }, { $set: { name: newEmployeeName } }).exec().then(result => {
         res.status(200).json({
-            message: 'Employee was deleted',
-            employeeId: employeeId
+            message: "Employee was updated.",
+            updatedEmployeeId: employeeId,
+            newEmployeeName: newEmployeeName
+        });
+    }).catch(err => {
+        res.status(500).json({ error: err });
+    });
+});
+
+//delete especific employee based on id
+router.delete('/delete/:employeeId', (req, res, next) => {
+    const employeeId = req.params.employeeId;
+
+    Employee.deleteOne({ _id: employeeId }).exec().then(result => {
+        res.status(200).json({
+            message: "Employee was deleted.",
+            deletedEmployeeId: employeeId
+        });
+    }).catch(err => {
+        res.status(500).json({
+            error: err
         });
     });
 });
